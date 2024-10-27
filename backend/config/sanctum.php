@@ -47,6 +47,7 @@ return [
     */
 
     'expiration' => null,
+    'personal_access_token_model' => App\Models\PersonalAccessToken::class,
 
     /*
     |--------------------------------------------------------------------------

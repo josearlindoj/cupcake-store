@@ -16,10 +16,22 @@ class Product extends Model
      */
     protected $table = 'products';
 
-    protected $fillable = ['name', 'description', 'price', 'stock', 'category_id'];
+    protected $fillable = ['name', 'description'];
 
-    public function category()
+//    public function category()
+//    {
+//        return $this->belongsTo(Category::class);
+//    }
+
+    public function skus()
     {
-        return $this->belongsTo(Category::class);
+        return $this->hasMany(SKU::class);
+    }
+
+    public function catalogs()
+    {
+        return $this->belongsToMany(Catalog::class)
+            ->withPivot('subsection')
+            ->withTimestamps();
     }
 }

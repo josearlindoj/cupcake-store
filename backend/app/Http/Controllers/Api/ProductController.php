@@ -5,48 +5,61 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Requests\ProductRequest;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // List all products
     public function index()
     {
-        $products = Product::with('category')->get();
-        return response()->json($products, 200);
+        $products = Product::with('skus')->get();
+
+        return response()->json([
+            'data' => $products,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Show a specific product
+    public function show($id)
     {
-        //
+        $product = Product::with('skus')->findOrFail($id);
+
+        return response()->json([
+            'data' => $product,
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Store a new product
+    public function store(ProductRequest $request)
+    {
+        $product = Product::create($request->validated());
+
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'data' => $product,
+        ], 201);
+    }
+
+    // Update a product
+    public function update(ProductRequest $request, $id)
     {
         $product = Product::findOrFail($id);
-        return response()->json($product, 200);
+        $product->update($request->validated());
+
+        return response()->json([
+            'message' => 'Product updated successfully.',
+            'data' => $product,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Delete a product
+    public function destroy($id)
     {
-        //
-    }
+        $product = Product::findOrFail($id);
+        $product->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'message' => 'Product deleted successfully.',
+        ]);
     }
 }

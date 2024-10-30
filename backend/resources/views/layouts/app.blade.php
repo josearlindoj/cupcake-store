@@ -7,10 +7,16 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- In the <head> section -->
+    @livewireStyles
 </head>
 <body>
 <div id="app">
     @yield('content')
 </div>
+
+<!-- Before the closing </body> tag -->
+@livewireScripts
 </body>
 </html>

@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('attribute_option_sku', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255);
-            $table->string('slug', 255)->unique();
+            $table->foreignId('sku_id')->constrained('skus')->onDelete('cascade');
+            $table->foreignId('attribute_option_id')->constrained('attribute_options')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('attribute_option_sku');
     }
 };

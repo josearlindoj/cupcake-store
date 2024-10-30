@@ -23,15 +23,9 @@
                     <th scope="col" class="px-6 py-3">
                         Product name
                     </th>
-                    <th scope="col" class="px-6 py-3">
-                        Color
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Category
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Price
-                    </th>
+{{--                    <th scope="col" class="px-6 py-3">--}}
+{{--                        Category--}}
+{{--                    </th>--}}
                     <th scope="col" class="px-6 py-3">
                         Action
                     </th>
@@ -43,15 +37,9 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             {{$product->name}}
                         </th>
-                        <td class="px-6 py-4">
-                            Silver
-                        </td>
-                        <td class="px-6 py-4">
-                            {{ $product->category ? $product->category->name : 'Uncategorized' }}
-                        </td>
-                        <td class="px-6 py-4">
-                            {{$product->price}}
-                        </td>
+{{--                        <td class="px-6 py-4">--}}
+{{--                            {{ $product->category ? $product->category->name : 'Uncategorized' }}--}}
+{{--                        </td>--}}
                         <td class="px-6 py-4">
                             <a href="{{ route('products.edit', $product->id) }}" class="font-medium text-blue-600 hover:underline">Edit</a>
                         </td>

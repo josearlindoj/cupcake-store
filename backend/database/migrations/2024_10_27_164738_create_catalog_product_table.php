@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->string('subsection')->nullable();
             $table->timestamps();
-            $table->unique(['catalog_id', 'product_id']);
+            $table->unique(['catalog_id']);
         });
     }
 

@@ -16,7 +16,7 @@ export function ProductDescription({ product }: { product: Product }) {
                     />
                 </div>
             </div>
-            <VariantSelector options={product.options} variants={product.variants} />
+            <VariantSelector options={product.options} variants={product.skus} />
             {product.descriptionHtml ? (
                 <Prose
                     className="mb-6 text-sm leading-tight dark:text-white/[60%]"

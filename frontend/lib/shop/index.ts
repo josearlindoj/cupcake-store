@@ -1,4 +1,5 @@
-import { Cart, Menu, Page, Product } from "./types";
+import {Cart, Menu, Page, Product} from "./types";
+import axios from "axios";
 
 const mockCart: Cart = {
     lines: [
@@ -270,14 +271,63 @@ export async function getPage(handle: string): Promise<Page> {
     const res = await shopifyFetch<ShopifyPageOperation>({
         query: getPageQuery,
         cache: 'no-store',
-        variables: { handle }
+        variables: {handle}
     });
 
     return res.body.data.pageByHandle;
 }
 
-export async function getProduct(handle: string): Promise<Product | undefined> {
-    return mockProduct;
+export async function getProduct(handle: string): Promise<Product | null> {
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/admin/products/${handle}`, {
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+        console.log(response.data)
+        const productData = response.data;
+
+        return {
+            id: productData.id,
+            title: productData.name,
+            handle: productData.slug,
+            description: productData.description,
+            availableForSale: productData.availableForSale,
+            skus: productData.skus,
+            availableForSale: true,
+            featuredImage: productData.featured_image_url
+                ? { url: productData.featured_image_url, altText: productData.name }
+                : undefined,
+            priceRange: {
+                minVariantPrice: {
+                    amount: productData.skus.length ? String(Math.min(...productData.skus.map((sku: any) => sku.price))) : '0.00',
+                    currencyCode: 'USD',
+                },
+                maxVariantPrice: {
+                    amount: productData.skus.length ? String(Math.max(...productData.skus.map((sku: any) => sku.price))) : '0.00',
+                    currencyCode: 'USD',
+                },
+            },
+            images: productData.skus.flatMap((sku: any) => sku.images || []).map((img: any) => ({
+                url: img.url,
+                altText: img.altText || productData.name,
+            })),
+            tags: productData.tags || [],
+        };
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            // Log specific error information from Axios
+            console.error('Error fetching product:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                headers: error.response?.headers,
+            });
+        } else {
+            console.error('Unexpected error:', error);
+        }
+        return null;
+    }
 }
 
 export async function getProductRecommendations(productId: string): Promise<Product[]> {

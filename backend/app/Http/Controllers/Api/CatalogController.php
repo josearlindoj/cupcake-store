@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Catalog;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CatalogController extends Controller
@@ -10,9 +12,11 @@ class CatalogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $catalogs = Catalog::with(['products.category', 'products.skus.attributeOptions'])->get();
+
+        return response()->json($catalogs);
     }
 
     /**

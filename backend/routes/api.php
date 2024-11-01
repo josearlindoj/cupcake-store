@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SKUController;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,10 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 Route::post('/register', [RegisterController::class, 'register']);
 // User Login Route
 Route::post('/login', [LoginController::class, 'login']);
+
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{slug}', [ProductController::class, 'show']);
+Route::get('/catalogs', [CatalogController::class, 'index']);
 
 Route::middleware(['auth:sanctum', \App\Http\Middleware\CheckTokenExpiry::class])->group(function () {
     // Product Management

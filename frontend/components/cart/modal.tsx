@@ -98,7 +98,7 @@ export default function CartModal() {
                                             .map((item, i) => {
                                                 const merchandiseSearchParams = {} as MerchandiseSearchParams;
 
-                                                item.merchandise.selectedOptions.forEach(({name, value}) => {
+                                                item.merchandise.selectedOptions?.forEach(({name, value}) => {
                                                     if (value !== DEFAULT_OPTION) {
                                                         merchandiseSearchParams[name.toLowerCase()] = value;
                                                     }
@@ -128,21 +128,19 @@ export default function CartModal() {
                                                                         width={64}
                                                                         height={64}
                                                                         alt={
-                                                                            item.merchandise.product.featuredImage.altText ||
-                                                                            item.merchandise.product.title
+                                                                            item.merchandise.product.featuredImage?.altText || item.merchandise.product.title || 'Product image'
                                                                         }
-                                                                        src={item.merchandise.product.featuredImage.url}
+                                                                        src={
+                                                                            item.merchandise.product.featuredImage?.url || '/path/to/default-image.jpg'
+                                                                        }
                                                                     />
                                                                 </div>
-                                                                <Link
-                                                                    href={merchandiseUrl}
-                                                                    onClick={closeCart}
-                                                                    className="z-30 ml-2 flex flex-row space-x-4"
-                                                                >
+                                                                <Link href={merchandiseUrl} onClick={closeCart}
+                                                                      className="z-30 ml-2 flex flex-row space-x-4">
                                                                     <div className="flex flex-1 flex-col text-base">
-                                                                    <span className="leading-tight">
-                                                                      {item.merchandise.product.title}
-                                                                    </span>
+                                <span className="leading-tight">
+                                    {item.merchandise.product.title}
+                                </span>
                                                                         {item.merchandise.title !== DEFAULT_OPTION ? (
                                                                             <p className="text-sm text-neutral-500 dark:text-neutral-400">
                                                                                 {item.merchandise.title}
@@ -165,8 +163,8 @@ export default function CartModal() {
                                                                         optimisticUpdate={updateCartItem}
                                                                     />
                                                                     <p className="w-6 text-center">
-                                                                        <span
-                                                                            className="w-full text-sm">{item.quantity}</span>
+                                            <span
+                                                className="w-full text-sm">{item.quantity}</span>
                                                                     </p>
                                                                     <EditItemQuantityButton
                                                                         item={item}
@@ -179,17 +177,9 @@ export default function CartModal() {
                                                     </li>
                                                 );
                                             })}
+
                                     </ul>
                                     <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                                        <div
-                                            className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
-                                            <p>Taxes</p>
-                                            <Price
-                                                className="text-right text-base text-black dark:text-white"
-                                                amount={cart.cost.totalTaxAmount.amount}
-                                                currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                                            />
-                                        </div>
                                         <div
                                             className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                                             <p>Shipping</p>

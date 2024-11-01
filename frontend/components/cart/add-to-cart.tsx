@@ -4,14 +4,14 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { addItem } from '@/components/cart/actions';
 import { useProduct } from '@/components/product/product-context';
-import { Product, ProductVariant } from '@/lib/shop/types';
+import { Product, SKU } from '@/lib/shop/types';
 import { useActionState } from 'react';
-import { useCart } from './cart-context';
+import { useCart } from '@/components/cart/cart-context';
 
 function SubmitButton({
-    availableForSale,
-    selectedVariantId
-}: {
+                          availableForSale,
+                          selectedVariantId
+                      }: {
     availableForSale: boolean;
     selectedVariantId: string | undefined;
 }) {
@@ -27,7 +27,6 @@ function SubmitButton({
         );
     }
 
-    console.log(selectedVariantId);
     if (!selectedVariantId) {
         return (
             <button
@@ -59,24 +58,29 @@ function SubmitButton({
 }
 
 export function AddToCart({ product }: { product: Product }) {
-    const { variants, availableForSale } = product;
+    const { skus = [], availableForSale } = product;
     const { addCartItem } = useCart();
     const { state } = useProduct();
     const [message, formAction] = useActionState(addItem, null);
 
-    const variant = variants.find((variant: ProductVariant) =>
-        variant.selectedOptions.every((option) => option.value === state[option.name.toLowerCase()])
+    // Determine the selected SKU (variant) based on user options
+    const variant = skus.find((sku: SKU) =>
+        sku.attributeOptions?.every((option) => option.value === state?.[option.name.toLowerCase()])
     );
-    const defaultVariantId = variants.length === 1 ? variants[0]?.id : undefined;
+
+    // Handle the case for a default SKU if only one SKU is present
+    const defaultVariantId = skus.length === 1 ? skus[0]?.id : undefined;
     const selectedVariantId = variant?.id || defaultVariantId;
-    const actionWithVariant = formAction.bind(null, selectedVariantId);
-    const finalVariant = variants.find((variant) => variant.id === selectedVariantId)!;
+    const actionWithVariant = selectedVariantId ? formAction.bind(null, selectedVariantId) : () => {};
+    const finalVariant = skus.find((sku) => sku.id === selectedVariantId);
 
     return (
         <form
             action={async () => {
-                addCartItem(finalVariant, product);
-                await actionWithVariant();
+                if (finalVariant) {
+                    addCartItem(finalVariant, product);
+                    await actionWithVariant();
+                }
             }}
         >
             <SubmitButton availableForSale={availableForSale} selectedVariantId={selectedVariantId} />

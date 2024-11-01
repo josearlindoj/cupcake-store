@@ -75,7 +75,7 @@ export type Product = {
     availableForSale: boolean;
     handle: string;
     descriptionHtml: string;
-    variants: ProductVariant[];
+    skus: SKU[];
     images: Image[];
     options: ProductOption[];
     tags: string[];
@@ -85,6 +85,16 @@ export type Product = {
         maxVariantPrice: Money;
         minVariantPrice: Money;
     };
+};
+
+export type SKU = {
+    id: number;
+    code: string;
+    price: number;
+    attribute_options: Array<{
+        id: number;
+        value: string;
+    }>;
 };
 
 export type ProductOption = {
@@ -97,7 +107,7 @@ export type ProductVariant = {
     id: string;
     title: string;
     availableForSale: boolean;
-    selectedOptions: {
+    attribute_options: {
         name: string;
         value: string;
     }[];

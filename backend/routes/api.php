@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SKUController;
+use App\Http\Controllers\Api\UserAddressController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\RegisterController;
 
@@ -16,21 +17,25 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/catalogs', [CatalogController::class, 'index']);
 
+// Logout Route
+Route::post('/logout', [LoginController::class, 'logout']);
+
 Route::middleware(['auth:sanctum', \App\Http\Middleware\CheckTokenExpiry::class])->group(function () {
     // Product Management
-    Route::post('/products', [ProductController::class, 'store']); // Create a new product
-    Route::put('/products/{product}', [ProductController::class, 'update']); // Update a product
-    Route::delete('/products/{product}', [ProductController::class, 'destroy']); // Delete a product
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{product}', [ProductController::class, 'update']);
+    Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
     // SKU Management
-    Route::get('/products/{product}/skus', [SKUController::class, 'index']); // List SKUs of a product
-    Route::get('/products/{product}/skus/{sku}', [SKUController::class, 'show']); // Show a specific SKU
-    Route::post('/products/{product}/skus', [SKUController::class, 'store']); // Create a new SKU
-    Route::put('/products/{product}/skus/{sku}', [SKUController::class, 'update']); // Update a SKU
-    Route::delete('/products/{product}/skus/{sku}', [SKUController::class, 'destroy']); // Delete a SKU
+    Route::get('/products/{product}/skus', [SKUController::class, 'index']);
+    Route::get('/products/{product}/skus/{sku}', [SKUController::class, 'show']);
+    Route::post('/products/{product}/skus', [SKUController::class, 'store']);
+    Route::put('/products/{product}/skus/{sku}', [SKUController::class, 'update']);
+    Route::delete('/products/{product}/skus/{sku}', [SKUController::class, 'destroy']);
 
-    // Logout Route
-    Route::post('/logout', [LoginController::class, 'logout']);
+    //User Address
+    Route::post('/user-addresses/upsert', [UserAddressController::class, 'upsert']);
+
     // Token Refresh Route
     Route::post('/refresh-token', [LoginController::class, 'refreshToken']);
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class LoginController extends Controller
         return response()->json([
             'message' => 'User logged in successfully.',
             'data' => [
-                'user' => $user,
+                'user' => User::where('email', $request->email)->with('Addresses')->first(),
                 'access_token' => $token,
                 'token_type' => 'Bearer',
                 'expires_at' => $expiration->toDateTimeString(),
@@ -66,8 +67,14 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        // Revoke the token
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if (!$user || !$user->currentAccessToken()) {
+            return response()->json([
+                'message' => 'No authenticated user found or no token to revoke.',
+            ], 401);
+        }
+
+        $user->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'User logged out successfully.',

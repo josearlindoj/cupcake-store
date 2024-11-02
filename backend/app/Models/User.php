@@ -36,4 +36,10 @@ class User extends Authenticatable
 
         return new NewAccessToken($token, $plainTextToken);
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+
 }

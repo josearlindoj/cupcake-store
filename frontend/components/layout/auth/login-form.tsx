@@ -37,7 +37,6 @@ export default function LoginForm({ onToggle, onSuccess }: LoginFormProps) {
                 const data = await response.json();
                 const { access_token, expires_at, user } = data.data;
 
-                // Save token, expiration, and user data
                 const storage = rememberMe ? localStorage : sessionStorage;
                 storage.setItem("accessToken", access_token);
                 storage.setItem("tokenExpiresAt", expires_at);

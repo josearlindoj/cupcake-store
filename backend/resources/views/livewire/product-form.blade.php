@@ -12,14 +12,43 @@
         </h2>
     </div>
 
-    <!-- Formulário de Cadastro -->
     <form wire:submit.prevent="save" class="space-y-6">
-        <!-- Nome do Produto -->
         <div>
             <label class="block text-sm font-medium leading-6 text-gray-900">Product Name</label>
             <input type="text" wire:model="name"
                    class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
             @error('name') <span class="text-red-600">{{ $message }}</span> @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium leading-6 text-gray-900">Product Images (max 6)</label>
+            <input type="file" wire:model="photos" multiple
+                   class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none">
+            @error('photos') <span class="text-red-600">{{ $message }}</span> @enderror
+            @error('photos.*') <span class="text-red-600">{{ $message }}</span> @enderror
+
+            <div class="mt-4 grid grid-cols-6 gap-4">
+                @foreach($photoPreviews as $index => $image)
+                    <div class="relative">
+                        <img src="{{ Storage::url($image) }}" alt="Product Image" class="w-full h-20 object-cover rounded-md">
+                        <button type="button" wire:click="removeImage({{ $index }}, 'photoPreviews')"
+                                class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                            &times;
+                        </button>
+                    </div>
+                @endforeach
+
+                @foreach($photos as $index => $photo)
+                    <div class="relative">
+                        <img src="{{ $photo->temporaryUrl() }}" alt="Product Image" class="w-full h-20 object-cover rounded-md">
+                        <button type="button" wire:click="removeImage({{ $index }}, 'photos')"
+                                class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                            &times;
+                        </button>
+                    </div>
+                @endforeach
+            </div>
+
         </div>
 
         <div>

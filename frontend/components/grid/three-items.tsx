@@ -27,7 +27,6 @@ interface Product {
     };
 }
 
-// Helper function to format the API data
 const formatProducts = (productsData: any[]): Product[] => {
     return productsData.map((product) => ({
         id: product.id,

@@ -14,7 +14,11 @@ class CatalogController extends Controller
      */
     public function index(): JsonResponse
     {
-        $catalogs = Catalog::with(['products.category', 'products.skus.attributeOptions'])->get();
+        $catalogs = Catalog::with([
+            'products.category',
+            'products.skus.attributeOptions',
+            'products.images'
+        ])->get();
 
         return response()->json($catalogs);
     }

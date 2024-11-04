@@ -5,19 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Sku extends Model
+class ProductImage extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'code', 'price', 'stock'];
+    protected $fillable = [
+        'product_id',
+        'image_path'
+    ];
+
+    protected $appends = ['url'];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
 
-    public function attributeOptions()
+    public function getUrlAttribute()
     {
-        return $this->belongsToMany(AttributeOption::class, 'attribute_option_sku')->withPivot('attribute_option_id');
+        return asset("storage/{$this->image_path}");
     }
 }

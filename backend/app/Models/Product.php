@@ -34,4 +34,22 @@ class Product extends Model
             ->withPivot('subsection')
             ->withTimestamps();
     }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    public function getImageUrl($filename = null)
+    {
+        $image = $filename
+            ? $this->images()->where('image_path', 'like', "%/{$filename}")->first()
+            : $this->images()->first();
+
+        if (!$image) {
+            return null;
+        }
+
+        return asset("storage/{$image->image_path}");
+    }
 }

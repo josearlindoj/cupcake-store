@@ -1,81 +1,101 @@
-// import { getCollectionProducts } from 'lib/shopify';
-import Link from 'next/link';
-import { GridTileImage } from './grid/tile';
-import { Product } from '@/lib/shop/types';
+"use client";
 
-// Define a mock product
-const mockProduct: Product = {
-    id: 'mock-id',
-    title: 'Test Product',
-    handle: 'test-product',
-    featuredImage: {
-        url: '/img/products/product_1.png',
-        altText: 'test',
-        width: 1000,
-        height: 1000
-    },
-    priceRange: {
-        maxVariantPrice: {
-            amount: '10.00',
-            currencyCode: 'USD'
-        },
-        minVariantPrice: {
-            amount: '5.00',
-            currencyCode: 'USD'
-        }
-    }
+import Link from "next/link";
+import { GridTileImage } from "./grid/tile";
+import { Product } from "@/lib/shop/types";
+import { useEffect, useState } from "react";
+
+type Catalog = {
+    id: number;
+    name: string;
+    products: Array<{
+        id: number;
+        name: string;
+        slug: string;
+        skus: Array<{ price: number }>;
+    }>;
 };
 
-// Define multiple mock products for testing
-const mockProducts: Product[] = [
-    {
-        ...mockProduct,
-        handle: 'test-product-1',
-        title: 'Test Product 1'
-    },
-    {
-        ...mockProduct,
-        handle: 'test-product-2',
-        title: 'Test Product 2'
-    },
-    {
-        ...mockProduct,
-        handle: 'test-product-3',
-        title: 'Test Product 3'
-    }
-];
+const formatProducts = (productsData: any[]): Product[] => {
+    // console.log(productsData[0].images[0]?.image_path)
+    return productsData.map((product) => ({
+        id: product.id,
+        title: product.name,
+        handle: product.slug,
+        featuredImage: {
+            url: product.images[0]?.url || "/img/products/product_1.png",
+            altText: product.name,
+            width: 1000,
+            height: 1000,
+        },
+        priceRange: {
+            maxVariantPrice: {
+                amount: String(Math.max(...product.skus.map((sku) => sku.price))),
+                currencyCode: "USD",
+            },
+            minVariantPrice: {
+                amount: String(Math.min(...product.skus.map((sku) => sku.price))),
+                currencyCode: "USD",
+            },
+        },
+    }));
+};
 
-export async function Carousel() {
-    const products = mockProducts;
+export function Carousel() {
+    const [catalogs, setCatalogs] = useState<Catalog[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
-    if (!products?.length) return null;
+    useEffect(() => {
+        async function fetchCatalogs() {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/catalogs`);
+                if (!response.ok) throw new Error("Failed to fetch catalogs");
 
-    const carouselProducts = [...products, ...products, ...products];
+                const catalogsData = await response.json();
+                setCatalogs(catalogsData);
+            } catch (err) {
+                setError((err as Error).message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchCatalogs();
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <div className="w-full overflow-x-auto pb-6 pt-1">
-            <ul className="flex animate-carousel gap-4">
-                {carouselProducts.map((product, i) => (
-                    <li
-                        key={`${product.handle}${i}`}
-                        className="relative aspect-square h-[30vh] max-h-[275px] w-2/3 max-w-[475px] flex-none md:w-1/3"
-                    >
-                        <Link href={`/product/${product.handle}`} className="relative h-full w-full">
-                            <GridTileImage
-                                alt={product.title}
-                                label={{
-                                    title: product.title,
-                                    amount: product.priceRange.maxVariantPrice.amount,
-                                    currencyCode: product.priceRange.maxVariantPrice.currencyCode
-                                }}
-                                src={product.featuredImage?.url}
-                                fill
-                                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                            />
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+            {catalogs.map((catalog) => (
+                <div key={catalog.id} className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4 ml-5">{catalog.name}</h2>
+                    <ul className="flex gap-4">
+                        {formatProducts(catalog.products).map((product, i) => (
+                            <li
+                                key={`${product.handle}${i}`}
+                                className="relative aspect-square h-[30vh] max-h-[275px] w-2/3 max-w-[475px] flex-none md:w-1/3"
+                            >
+                                <Link href={`/product/${product.handle}`} className="relative h-full w-full">
+                                    <GridTileImage
+                                        alt={product.title}
+                                        label={{
+                                            title: product.title,
+                                            amount: product.priceRange.maxVariantPrice.amount,
+                                            currencyCode: product.priceRange.maxVariantPrice.currencyCode,
+                                        }}
+                                        src={product.featuredImage?.url}
+                                        fill
+                                        sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                                    />
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
         </div>
     );
 }

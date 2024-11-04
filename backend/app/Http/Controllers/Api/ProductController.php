@@ -4,16 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     // List all products
     public function index(): JsonResponse
     {
-        $products = Product::with(['category', 'skus.attributeOptions', 'catalogs'])->get();
+        $products = Product::with(['category', 'skus.attributeOptions', 'catalogs', 'images'])->get();
 
         return response()->json($products);
     }
@@ -21,7 +23,7 @@ class ProductController extends Controller
     // Show a specific product
     public function show(string $slug): JsonResponse
     {
-        $product = Product::with(['category', 'skus.attributeOptions', 'catalogs'])->where('slug', $slug)->first();
+        $product = Product::with(['category', 'skus.attributeOptions', 'catalogs', 'images'])->where('slug', $slug)->first();
 
         return response()->json([
             'id' => $product->id,
@@ -83,5 +85,22 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Product deleted successfully.',
         ]);
+    }
+
+    public function showImageByName($filename)
+    {
+        $productImage = ProductImage::where('image_path', 'like', "%/{$filename}")->first();
+
+        if (!$productImage) {
+            return response()->json(['error' => 'Image not found'], 404);
+        }
+
+        // Generate the full URL based on `image_path`
+        $imageUrl = asset("storage/{$productImage->image_path}");
+
+        return response()->json([
+            'image_url' => $imageUrl
+        ]);
+
     }
 }

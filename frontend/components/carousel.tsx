@@ -17,7 +17,6 @@ type Catalog = {
 };
 
 const formatProducts = (productsData: any[]): Product[] => {
-    // console.log(productsData[0].images[0]?.image_path)
     return productsData.map((product) => ({
         id: product.id,
         title: product.name,

@@ -108,8 +108,10 @@ export type ProductVariant = {
     title: string;
     availableForSale: boolean;
     attribute_options: {
+        id: string;
         name: string;
         value: string;
+        attribute_name: string;
     }[];
     price: Money;
 };

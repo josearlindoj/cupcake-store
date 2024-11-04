@@ -1,84 +1,55 @@
 'use client';
 
 import clsx from 'clsx';
-import { useProduct, useUpdateURL } from '@/components/product/product-context';
-import { ProductOption, ProductVariant } from '@/lib/shop/types';
+import {useProduct, useUpdateURL} from '@/components/product/product-context';
+import {ProductOption} from '@/lib/shop/types';
 
-type Combination = {
-    id: string;
-    availableForSale: boolean;
-    [key: string]: string | boolean;
-};
-
-export function VariantSelector({options = [],variants = []}: {
+export function VariantSelector({options = [], variants = []}: {
     options: ProductOption[];
-    variants: ProductVariant[];
+    variants: any[];
 }) {
-    const { state, updateOption } = useProduct();
+    const {state, updateOption} = useProduct();
     const updateURL = useUpdateURL();
 
-    // const hasNoOptionsOrJustOneOption = !options?.length || (options.length === 1 && options[0]?.values?.length === 1);
-    //
-    // if (hasNoOptionsOrJustOneOption) {
-    //     return null;
-    // }
+    // If there are no options or only one option group, return null
+    const hasNoOptionsOrJustOneOption = variants.length < 2;
 
-    // Build combination list for option availability checks
-    const combinations: Combination[] = variants.map((variant) => ({
-        id: variant.id,
-        availableForSale: true,
-        ...variant.attribute_options.reduce(
-            (accumulator, option) => ({ ...accumulator, [option.value.toLowerCase()]: option.value }),
-            {}
-        )
-    }));
+    if (hasNoOptionsOrJustOneOption) {
+        return null;
+    }
 
-    return options.map((option) => (
-        <form key={option.id}>
+    return variants[0].attribute_options.map((attributeOptionGroup) => (
+        <form key={attributeOptionGroup.variants.id}>
             <dl className="mb-8">
-                <dt className="mb-4 text-sm uppercase tracking-wide">{option.name}</dt>
+                <dt className="mb-4 text-sm uppercase tracking-wide">{attributeOptionGroup.variants.name}</dt>
                 <dd className="flex flex-wrap gap-3">
-                    {option.values.map((value) => {
-                        const optionNameLowerCase = option.name.toLowerCase();
-
-                        const optionParams = { ...state, [optionNameLowerCase]: value };
-
-                        const filtered = Object.entries(optionParams).filter(([key, val]) =>
-                            options.find(
-                                (opt) => opt.name.toLowerCase() === key && opt.values.includes(val)
-                            )
-                        );
-                        const isAvailableForSale = combinations.some((combination) =>
-                            filtered.every(
-                                ([key, val]) => combination[key] === val && combination.availableForSale
-                            )
-                        );
-
-                        const isActive = state[optionNameLowerCase] === value;
+                    {attributeOptionGroup.options.map((option) => {
+                        const optionNameLowerCase = attributeOptionGroup.variants.name.toLowerCase();
+                        const isActive = state[optionNameLowerCase] === option.value;
 
                         return (
                             <button
+                                key={option.id}
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    const newState = updateOption(optionNameLowerCase, value);
+                                    const newState = updateOption(optionNameLowerCase, option.value);
                                     updateURL(newState);
                                 }}
-                                key={value}
-                                aria-disabled={!isAvailableForSale}
-                                disabled={!isAvailableForSale}
-                                title={`${option.name} ${value}${!isAvailableForSale ? ' (Out of Stock)' : ''}`}
+                                aria-disabled={!option.availableForSale}
+                                disabled={!option.availableForSale}
+                                title={`${attributeOptionGroup.variants.name} ${option.value}${!option.availableForSale ? ' (Out of Stock)' : ''}`}
                                 className={clsx(
                                     'flex min-w-[48px] items-center justify-center rounded-full border bg-neutral-100 px-2 py-1 text-sm dark:border-neutral-800 dark:bg-neutral-900',
                                     {
                                         'cursor-default ring-2 ring-blue-600': isActive,
                                         'ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-blue-600':
-                                            !isActive && isAvailableForSale,
+                                            !isActive && option.availableForSale,
                                         'relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 before:dark:bg-neutral-700':
-                                            !isAvailableForSale
+                                            !option.availableForSale
                                     }
                                 )}
                             >
-                                {value}
+                                {option.value}
                             </button>
                         );
                     })}

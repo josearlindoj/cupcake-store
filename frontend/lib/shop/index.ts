@@ -284,7 +284,6 @@ export async function getProduct(handle: string): Promise<Product | null> {
                 Accept: 'application/json',
             },
         });
-        console.log(response.data)
         const productData = response.data;
 
         return {
@@ -294,6 +293,7 @@ export async function getProduct(handle: string): Promise<Product | null> {
             description: productData.description,
             availableForSale: productData.availableForSale,
             skus: productData.skus,
+            images: productData.images,
             availableForSale: true,
             featuredImage: productData.featured_image_url
                 ? { url: productData.featured_image_url, altText: productData.name }
@@ -308,9 +308,11 @@ export async function getProduct(handle: string): Promise<Product | null> {
                     currencyCode: 'USD',
                 },
             },
-            images: productData.skus.flatMap((sku: any) => sku.images || []).map((img: any) => ({
+            images: productData.images.map((img: any) => ({
                 url: img.url,
-                altText: img.altText || productData.name,
+                altText: 'Cupcake',
+                width: 1000,
+                height: 1000,
             })),
             tags: productData.tags || [],
         };

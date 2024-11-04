@@ -8,6 +8,7 @@ use App\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -23,13 +24,19 @@ class ProductController extends Controller
     // Show a specific product
     public function show(string $slug): JsonResponse
     {
-        $product = Product::with(['category', 'skus.attributeOptions', 'catalogs', 'images'])->where('slug', $slug)->first();
+        $product = Product::with([
+            'category',
+            'skus.attributeOptions.attribute',
+            'catalogs',
+            'images'
+        ])->where('slug', $slug)->first();
 
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
             'category' => $product->category,
+            'images' => $product->images,
             'skus' => $product->skus->map(function ($sku) {
                 return [
                     'id' => $sku->id,
@@ -37,8 +44,8 @@ class ProductController extends Controller
                     'price' => $sku->price,
                     'attribute_options' => $sku->attributeOptions->map(function ($option) {
                         return [
-                            'id' => $option->id,
-                            'value' => $option->value,
+                            'options' => $option->attribute->options,
+                            'variants' => $option->attribute
                         ];
                     }),
                 ];

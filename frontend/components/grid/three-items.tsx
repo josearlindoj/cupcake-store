@@ -33,7 +33,7 @@ const formatProducts = (productsData: any[]): Product[] => {
         name: product.name,
         slug: product.slug,
         featuredImage: {
-            url: '/img/products/product_1.png',
+            url: product.images[0]?.url || '/img/products/product_1.png',
             altText: product.name,
             width: 1000,
             height: 1000,

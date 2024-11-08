@@ -1,4 +1,5 @@
-import {Cart, Menu, Page, Product} from "./types";
+import {Cart, Menu, Page, Product} from '@/lib/shop/types';
+import {cookies} from 'next/headers';
 import axios from "axios";
 
 const mockCart: Cart = {
@@ -221,12 +222,20 @@ const mockProducts: Product[] = [
     }
 ];
 
-export async function getCart(cartId: string | undefined): Promise<Cart | undefined> {
-    if (!cartId) {
-        return undefined;
+export async function getCart(): Promise<Cart | undefined> {
+    const cookieStore = await cookies();
+    const cartData = cookieStore.get('cart');
+
+    if (cartData) {
+        try {
+            return JSON.parse(cartData.value) as Cart;
+        } catch (error) {
+            console.error('Error parsing cart data from cookies:', error);
+            return undefined;
+        }
     }
 
-    return mockCart;
+    return undefined;
 }
 
 export async function addToCart(

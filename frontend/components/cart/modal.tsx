@@ -134,15 +134,12 @@ export default function CartModal() {
                                                                         }
                                                                     />
                                                                 </div>
-                                                                <Link
-                                                                    href={merchandiseUrl}
-                                                                    onClick={closeCart}
-                                                                    className="z-30 ml-2 flex flex-row space-x-4"
-                                                                >
+                                                                <Link href={merchandiseUrl} onClick={closeCart}
+                                                                      className="z-30 ml-2 flex flex-row space-x-4">
                                                                     <div className="flex flex-1 flex-col text-base">
-                                    <span className="leading-tight">
-                                      {item.merchandise.product.title}
-                                    </span>
+                                                                        <span className="leading-tight">
+                                                                            {item.merchandise.product.title}
+                                                                        </span>
                                                                         {item.merchandise.title !== DEFAULT_OPTION ? (
                                                                             <p className="text-sm text-neutral-500 dark:text-neutral-400">
                                                                                 {item.merchandise.title}

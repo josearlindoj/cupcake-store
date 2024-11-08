@@ -10,7 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {Fragment, useEffect, useRef, useState} from 'react';
 import {useFormStatus} from 'react-dom';
-import {createCartAndSetCookie, redirectToCheckout} from '@/components/cart/actions';
+import {redirectToCheckout} from '@/components/cart/actions';
 import {useCart} from './cart-context';
 import CloseCart from '@/components/cart/close-cart';
 import {DeleteItemButton} from '@/components/cart/delete-item-button';
@@ -29,12 +29,6 @@ export default function CartModal() {
     const closeCart = () => setIsOpen(false);
 
     useEffect(() => {
-        if (!cart) {
-            createCartAndSetCookie();
-        }
-    }, [cart]);
-
-    useEffect(() => {
         if (
             cart?.totalQuantity &&
             cart?.totalQuantity !== quantityRef.current &&
@@ -45,7 +39,7 @@ export default function CartModal() {
             }
             quantityRef.current = cart?.totalQuantity;
         }
-    }, [isOpen, cart?.totalQuantity, quantityRef]);
+    }, [isOpen, cart?.totalQuantity]);
 
     return (
         <>
@@ -99,7 +93,7 @@ export default function CartModal() {
                                                 const merchandiseSearchParams = {} as MerchandiseSearchParams;
 
                                                 item.merchandise.selectedOptions?.forEach(({name, value}) => {
-                                                    if (value !== DEFAULT_OPTION) {
+                                                    if (value !== DEFAULT_OPTION && name) {
                                                         merchandiseSearchParams[name.toLowerCase()] = value;
                                                     }
                                                 });
@@ -117,8 +111,10 @@ export default function CartModal() {
                                                         <div
                                                             className="relative flex w-full flex-row justify-between px-1 py-4">
                                                             <div className="absolute z-40 -ml-1 -mt-2">
-                                                                <DeleteItemButton item={item}
-                                                                                  optimisticUpdate={updateCartItem}/>
+                                                                <DeleteItemButton
+                                                                    item={item}
+                                                                    optimisticUpdate={updateCartItem}
+                                                                />
                                                             </div>
                                                             <div className="flex flex-row">
                                                                 <div
@@ -128,19 +124,25 @@ export default function CartModal() {
                                                                         width={64}
                                                                         height={64}
                                                                         alt={
-                                                                            item.merchandise.product.featuredImage?.altText || item.merchandise.product.title || 'Product image'
+                                                                            item.merchandise.product.featuredImage?.altText ||
+                                                                            item.merchandise.product.title ||
+                                                                            'Product image'
                                                                         }
                                                                         src={
-                                                                            item.merchandise.product.featuredImage?.url || '/path/to/default-image.jpg'
+                                                                            item.merchandise.product.featuredImage?.url ||
+                                                                            '/path/to/default-image.jpg'
                                                                         }
                                                                     />
                                                                 </div>
-                                                                <Link href={merchandiseUrl} onClick={closeCart}
-                                                                      className="z-30 ml-2 flex flex-row space-x-4">
+                                                                <Link
+                                                                    href={merchandiseUrl}
+                                                                    onClick={closeCart}
+                                                                    className="z-30 ml-2 flex flex-row space-x-4"
+                                                                >
                                                                     <div className="flex flex-1 flex-col text-base">
-                                <span className="leading-tight">
-                                    {item.merchandise.product.title}
-                                </span>
+                                    <span className="leading-tight">
+                                      {item.merchandise.product.title}
+                                    </span>
                                                                         {item.merchandise.title !== DEFAULT_OPTION ? (
                                                                             <p className="text-sm text-neutral-500 dark:text-neutral-400">
                                                                                 {item.merchandise.title}
@@ -163,8 +165,8 @@ export default function CartModal() {
                                                                         optimisticUpdate={updateCartItem}
                                                                     />
                                                                     <p className="w-6 text-center">
-                                            <span
-                                                className="w-full text-sm">{item.quantity}</span>
+                                                                        <span
+                                                                            className="w-full text-sm">{item.quantity}</span>
                                                                     </p>
                                                                     <EditItemQuantityButton
                                                                         item={item}
@@ -177,7 +179,6 @@ export default function CartModal() {
                                                     </li>
                                                 );
                                             })}
-
                                     </ul>
                                     <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                                         <div
@@ -195,9 +196,12 @@ export default function CartModal() {
                                             />
                                         </div>
                                     </div>
-                                    <form action={redirectToCheckout}>
-                                        <CheckoutButton/>
-                                    </form>
+                                    <button
+                                        className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
+                                        onClick={redirectToCheckout}
+                                    >
+                                        Proceed to Checkout
+                                    </button>
                                 </div>
                             )}
                         </Dialog.Panel>
@@ -205,19 +209,5 @@ export default function CartModal() {
                 </Dialog>
             </Transition>
         </>
-    );
-}
-
-function CheckoutButton() {
-    const {pending} = useFormStatus();
-
-    return (
-        <button
-            className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
-            type="submit"
-            disabled={pending}
-        >
-            {pending ? <LoadingDots className="bg-white"/> : 'Proceed to Checkout'}
-        </button>
     );
 }

@@ -15,10 +15,14 @@ class AdminSeeder extends Seeder
      */
     public function run()
     {
-        Admin::create([
-            'name' => 'Admin User',
-            'email' => 'admin@mail.com',
-            'password' => Hash::make('password'),
-        ]);
+        $admin = Admin::where('email', 'admin@admin.com')->first()->toArray();
+
+        if(empty($admin)) {
+            Admin::create([
+                'name' => 'Admin User',
+                'email' => 'admin@mail.com',
+                'password' => Hash::make('password'),
+            ]);
+        }
     }
 }

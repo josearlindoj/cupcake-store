@@ -1,5 +1,4 @@
-import {Cart, Menu, Page, Product} from '@/lib/shop/types';
-import {cookies} from 'next/headers';
+import {Cart, Menu, Page, Product, Image} from '@/lib/shop/types';
 import axios from "axios";
 
 const mockCart: Cart = {
@@ -79,8 +78,7 @@ const mockProduct: Product = {
     title: 'Test Product',
     handle: 'test-product',
     availableForSale: true,
-    description: '',
-    descriptionHtml: `
+    description: `
         <div>
             <h3>Delicious Cupcakes</h3>
             <p>Our cupcakes are made from the finest ingredients, offering a delightful treat for any occasion. Choose from a variety of flavors, including:</p>
@@ -222,22 +220,6 @@ const mockProducts: Product[] = [
     }
 ];
 
-export async function getCart(): Promise<Cart | undefined> {
-    const cookieStore = await cookies();
-    const cartData = cookieStore.get('cart');
-
-    if (cartData) {
-        try {
-            return JSON.parse(cartData.value) as Cart;
-        } catch (error) {
-            console.error('Error parsing cart data from cookies:', error);
-            return undefined;
-        }
-    }
-
-    return undefined;
-}
-
 export async function addToCart(
     cartId: string,
     lines: { merchandiseId: string; quantity: number }[]
@@ -261,29 +243,16 @@ export async function updateCart(
 }
 
 export async function getMenu(handle: string): Promise<Menu[]> {
-    // Mocked menu items
-    const mockMenu: Menu[] = [
+    return [
         {
             title: 'Home',
             path: '/',
         },
         {
             title: 'Shop',
-            path: '/search',
+            path: '/products',
         },
     ];
-
-    return mockMenu;
-}
-
-export async function getPage(handle: string): Promise<Page> {
-    const res = await shopifyFetch<ShopifyPageOperation>({
-        query: getPageQuery,
-        cache: 'no-store',
-        variables: {handle}
-    });
-
-    return res.body.data.pageByHandle;
 }
 
 export async function getProduct(handle: string): Promise<Product | null> {
@@ -294,19 +263,28 @@ export async function getProduct(handle: string): Promise<Product | null> {
             },
         });
         const productData = response.data;
+        const featuredImage: Image = productData.featured_image_url
+            ? {
+                url: productData.featured_image_url,
+                altText: productData.name,
+                width: 1000,
+                height: 1000,
+            }
+            : {
+                url: "default-image-url.jpg",
+                altText: "Default Image",
+                width: 1000,
+                height: 1000,
+            };
 
         return {
             id: productData.id,
             title: productData.name,
             handle: productData.slug,
             description: productData.description,
-            availableForSale: productData.availableForSale,
             skus: productData.skus,
-            images: productData.images,
             availableForSale: true,
-            featuredImage: productData.featured_image_url
-                ? { url: productData.featured_image_url, altText: productData.name }
-                : undefined,
+            featuredImage,
             priceRange: {
                 minVariantPrice: {
                     amount: productData.skus.length ? String(Math.min(...productData.skus.map((sku: any) => sku.price))) : '0.00',
@@ -327,7 +305,6 @@ export async function getProduct(handle: string): Promise<Product | null> {
         };
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            // Log specific error information from Axios
             console.error('Error fetching product:', {
                 message: error.message,
                 response: error.response?.data,
@@ -343,4 +320,65 @@ export async function getProduct(handle: string): Promise<Product | null> {
 
 export async function getProductRecommendations(productId: string): Promise<Product[]> {
     return mockProducts;
+}
+
+export const formatProducts = (productsData: any[]): Product[] => {
+    return productsData.map((product) => ({
+        id: product.id,
+        title: product.name,
+        handle: product.slug,
+        description: product.description,
+        skus: product.skus,
+        availableForSale: true,
+        featuredImage: {
+            url: product.images[0]?.url || '/img/products/product_1.png',
+            altText: product.name,
+            width: 1000,
+            height: 1000,
+        },
+        priceRange: {
+            maxVariantPrice: {
+                amount: String(Math.max(...product.skus.map((sku: any) => sku.price))),
+                currencyCode: 'USD',
+            },
+            minVariantPrice: {
+                amount: String(Math.min(...product.skus.map((sku: any) => sku.price))),
+                currencyCode: 'USD',
+            },
+        },
+        images: product.images.map((img: any) => ({
+            url: img.url,
+            altText: 'Cupcake',
+            width: 1000,
+            height: 1000,
+        })),
+        tags: product.tags || [],
+    }));
+};
+
+export async function getProducts(): Promise<Product[] | null> {
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/admin/products`, {
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+
+        const productData = response.data;
+
+        return formatProducts(productData);
+
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Error fetching product:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                headers: error.response?.headers,
+            });
+        } else {
+            console.error('Unexpected error:', error);
+        }
+        return null;
+    }
 }

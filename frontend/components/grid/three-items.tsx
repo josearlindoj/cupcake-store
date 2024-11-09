@@ -4,52 +4,8 @@ import {GridTileImage} from '@/components/grid/tile';
 import Link from 'next/link';
 import {useEffect, useState} from 'react';
 import LoadingDots from "@/components/loading-dots";
-
-interface Product {
-    id: number;
-    name: string;
-    slug: string;
-    featuredImage?: {
-        url: string;
-        altText: string;
-        width: number;
-        height: number;
-    };
-    priceRange: {
-        maxVariantPrice: {
-            amount: string;
-            currencyCode: string;
-        };
-        minVariantPrice: {
-            amount: string;
-            currencyCode: string;
-        };
-    };
-}
-
-const formatProducts = (productsData: any[]): Product[] => {
-    return productsData.map((product) => ({
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        featuredImage: {
-            url: product.images[0]?.url || '/img/products/product_1.png',
-            altText: product.name,
-            width: 1000,
-            height: 1000,
-        },
-        priceRange: {
-            maxVariantPrice: {
-                amount: String(Math.max(...product.skus.map((sku: any) => sku.price))),
-                currencyCode: 'USD',
-            },
-            minVariantPrice: {
-                amount: String(Math.min(...product.skus.map((sku: any) => sku.price))),
-                currencyCode: 'USD',
-            },
-        },
-    }));
-};
+import {Product} from "@/lib/shop/types";
+import {formatProducts} from '@/lib/shop';
 
 function ThreeItemGridItem({item, size, priority,}: { item: Product; size: 'full' | 'half'; priority?: boolean; }) {
     const image = item.featuredImage?.url || '/img/products/product_1.png';
@@ -57,7 +13,7 @@ function ThreeItemGridItem({item, size, priority,}: { item: Product; size: 'full
         <div className={size === 'full' ? 'md:col-span-4 md:row-span-2' : 'md:col-span-2 md:row-span-1'}>
             <Link
                 className="relative block aspect-square h-full w-full"
-                href={`/product/${item.slug}`}
+                href={`/product/${item.handle}`}
                 prefetch={true}
             >
                 <GridTileImage
@@ -65,10 +21,10 @@ function ThreeItemGridItem({item, size, priority,}: { item: Product; size: 'full
                     fill
                     sizes={size === 'full' ? '(min-width: 768px) 66vw, 100vw' : '(min-width: 768px) 33vw, 100vw'}
                     priority={priority}
-                    alt={item.name}
+                    alt={item.title}
                     label={{
                         position: size === 'full' ? 'center' : 'bottom',
-                        title: item.name,
+                        title: item.title,
                         amount: item.priceRange.maxVariantPrice.amount,
                         currencyCode: item.priceRange.maxVariantPrice.currencyCode,
                     }}

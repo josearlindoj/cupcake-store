@@ -5,7 +5,6 @@ import { Menu } from '@/lib/shop/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import MobileMenu from '@/components/layout/navbar/mobile-menu';
-import Search, { SearchSkeleton } from '@/components/layout/navbar/search';
 import UserDialog from "@/components/layout/navbar/user-dialog";
 
 const { SITE_NAME } = process.env;
@@ -49,9 +48,7 @@ export async function Navbar() {
                     ) : null}
                 </div>
                 <div className="hidden justify-center md:flex md:w-1/3">
-                    <Suspense fallback={<SearchSkeleton/>}>
-                        <Search/>
-                    </Suspense>
+
                 </div>
                 <div className="flex justify-end md:w-1/3">
                     <div className="mr-2">

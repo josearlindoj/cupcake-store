@@ -44,7 +44,7 @@ export default function CartModal() {
     return (
         <>
             <button aria-label="Open cart" onClick={openCart}>
-                <OpenCart quantity={cart?.totalQuantity}/>
+                <OpenCart/>
             </button>
             <Transition show={isOpen}>
                 <Dialog onClose={closeCart} className="relative z-50">

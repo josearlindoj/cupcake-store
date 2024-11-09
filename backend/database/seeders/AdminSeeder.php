@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
      */
     public function run()
     {
-        $admin = Admin::where('email', 'admin@admin.com')->first()->toArray();
+        $admin = Admin::where('email', 'admin@admin.com')->first();
 
         if(empty($admin)) {
             Admin::create([

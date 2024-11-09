@@ -9,14 +9,14 @@ import React, {
     startTransition,
     useEffect,
 } from 'react';
-// @ts-ignore
 import Cookies from 'js-cookie';
 
 type UpdateType = 'plus' | 'minus' | 'delete';
 
 type CartAction =
     | { type: 'UPDATE_ITEM'; payload: { merchandiseId: string; updateType: UpdateType } }
-    | { type: 'ADD_ITEM'; payload: { variant: ProductVariant; product: Product } };
+    | { type: 'ADD_ITEM'; payload: { variant: ProductVariant; product: Product } }
+    | { type: 'CLEAR_CART' };
 
 type CartContextType = {
     cart: Cart | undefined;
@@ -61,16 +61,18 @@ function createOrUpdateCartItem(
     const price = variant.price;
     const totalAmount = calculateItemCost(quantity, price.toString());
 
-    const selectedOptions = variant.attribute_options?.map((attributeOptionGroup: { variants: { name: any; }; options: any[]; }) => {
-        const name = attributeOptionGroup.variants.name;
-        const selectedOption = attributeOptionGroup.options.find(option => {
-            return option;
-        });
-        return {
-            name,
-            value: selectedOption?.value || ''
-        };
-    }) || [];
+    const selectedOptions =
+        variant.attribute_options?.map((attributeOptionGroup: any) => {
+            const name = attributeOptionGroup.variants.name;
+            const selectedOption = attributeOptionGroup.options.find((option: any) => {
+                // Implement your logic to determine the selected option
+                return option.selected; // Adjust as needed
+            });
+            return {
+                name,
+                value: selectedOption?.value || '',
+            };
+        }) || [];
 
     return {
         id: existingItem?.id,
@@ -78,8 +80,8 @@ function createOrUpdateCartItem(
         cost: {
             totalAmount: {
                 amount: totalAmount,
-                currencyCode: 'USD'
-            }
+                currencyCode: 'USD',
+            },
         },
         merchandise: {
             id: variant.id,
@@ -89,9 +91,9 @@ function createOrUpdateCartItem(
                 id: product.id,
                 handle: product.handle,
                 title: product.title,
-                featuredImage: product.images?.[0]
-            }
-        }
+                featuredImage: product.images?.[0],
+            },
+        },
     };
 }
 
@@ -128,7 +130,7 @@ function getCartFromCookies(): Cart {
     const cartData = Cookies.get('cart');
     if (cartData) {
         try {
-            return JSON.parse(cartData);
+            return JSON.parse(cartData) as Cart;
         } catch (error) {
             console.error('Error parsing cart data from cookies:', error);
         }
@@ -139,7 +141,7 @@ function getCartFromCookies(): Cart {
 function saveCartToCookies(cart: Cart) {
     try {
         const cartData = JSON.stringify(cart);
-        Cookies.set('cart', cartData, { expires: 7 }); // Expires in 7 days
+        Cookies.set('cart', cartData, { expires: 7 });
     } catch (error) {
         console.error('Error saving cart data to cookies:', error);
     }
@@ -182,6 +184,9 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
 
             return { ...currentCart, ...updateCartTotals(updatedLines), lines: updatedLines };
         }
+        case 'CLEAR_CART': {
+            return createEmptyCart();
+        }
         default:
             return currentCart;
     }
@@ -189,6 +194,7 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const initialCart = getCartFromCookies();
+
     const [optimisticCart, updateOptimisticCart] = useOptimistic(initialCart, cartReducer);
 
     useEffect(() => {
@@ -207,11 +213,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
+    const clearCart = () => {
+        startTransition(() => {
+            updateOptimisticCart({ type: 'CLEAR_CART' });
+        });
+    };
+
     const value = useMemo(
         () => ({
             cart: optimisticCart,
             updateCartItem,
             addCartItem,
+            clearCart,
         }),
         [optimisticCart]
     );

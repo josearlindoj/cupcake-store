@@ -1,5 +1,5 @@
 // auth/authService.ts
-import api from "@/api/axiosInstance";
+import api from "@/app/api/axiosInstance";
 
 // Login function
 export async function login(email: string, password: string) {

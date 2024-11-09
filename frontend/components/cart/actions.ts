@@ -1,118 +1,34 @@
-'use server';
+'use client';
 
-import { TAGS } from '@/lib/constants';
-import { addToCart, createCart, getCart, removeFromCart, updateCart } from '@/lib/shop';
-import { revalidateTag } from 'next/cache';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
 
-export async function addItem(prevState: any, selectedVariantId: string | undefined) {
-    let cartId = (await cookies()).get('cartId')?.value;
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-    if (!cartId || !selectedVariantId) {
-        return 'Error adding item to cart';
+export async function redirectToCheckout(cartItems: any[]) {
+    const stripe = await stripePromise;
+
+    const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cartItems }),
+    });
+
+    const { sessionId, error } = await response.json();
+
+    if (error) {
+        console.error('Error creating checkout session:', error);
+        alert('Failed to create checkout session.');
+        return;
     }
 
-    try {
-        await addToCart(cartId, [{ merchandiseId: selectedVariantId, quantity: 1 }]);
-        revalidateTag(TAGS.cart);
-    } catch (e) {
-        return 'Error adding item to cart';
+    const { error: stripeError } = await stripe!.redirectToCheckout({
+        sessionId,
+    });
+
+    if (stripeError) {
+        console.error('Stripe redirect error:', stripeError);
+        alert('Failed to redirect to checkout.');
     }
-}
-
-export async function removeItem(prevState: any, merchandiseId: string) {
-    let cartId = (await cookies()).get('cartId')?.value;
-
-    if (!cartId) {
-        return 'Missing cart ID';
-    }
-
-    try {
-        const cart = await getCart(cartId);
-
-        if (!cart) {
-            return 'Error fetching cart';
-        }
-
-        const lineItem = cart.lines.find((line) => line.merchandise.id === merchandiseId);
-
-        if (lineItem && lineItem.id) {
-            await removeFromCart(cartId, [lineItem.id]);
-            revalidateTag(TAGS.cart);
-        } else {
-            return 'Item not found in cart';
-        }
-    } catch (e) {
-        return 'Error removing item from cart';
-    }
-}
-
-export async function updateItemQuantity(
-    prevState: any,
-    payload: {
-        merchandiseId: string;
-        quantity: number;
-    }
-) {
-    let cartId = (await cookies()).get('cartId')?.value;
-
-    if (!cartId) {
-        return 'Missing cart ID';
-    }
-
-    const { merchandiseId, quantity } = payload;
-
-    try {
-        const cart = await getCart(cartId);
-
-        if (!cart) {
-            return 'Error fetching cart';
-        }
-
-        const lineItem = cart.lines.find((line) => line.merchandise.id === merchandiseId);
-
-        if (lineItem && lineItem.id) {
-            if (quantity === 0) {
-                await removeFromCart(cartId, [lineItem.id]);
-            } else {
-                await updateCart(cartId, [
-                    {
-                        id: lineItem.id,
-                        merchandiseId,
-                        quantity
-                    }
-                ]);
-            }
-        } else if (quantity > 0) {
-            // If the item doesn't exist in the cart and quantity > 0, add it
-            await addToCart(cartId, [{ merchandiseId, quantity }]);
-        }
-
-        revalidateTag(TAGS.cart);
-    } catch (e) {
-        console.error(e);
-        return 'Error updating item quantity';
-    }
-}
-
-export async function redirectToCheckout() {
-    let cartId = (await cookies()).get('cartId')?.value;
-
-    if (!cartId) {
-        return 'Missing cart ID';
-    }
-
-    let cart = await getCart(cartId);
-
-    if (!cart) {
-        return 'Error fetching cart';
-    }
-
-    redirect(cart.checkoutUrl);
-}
-
-export async function createCartAndSetCookie() {
-    let cart = await createCart();
-    (await cookies()).set('cartId', cart.id!);
 }

@@ -10,7 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {Fragment, useEffect, useRef, useState} from 'react';
 import {useFormStatus} from 'react-dom';
-import {redirectToCheckout} from '@/components/cart/actions';
+import { redirectToCheckout } from '@/components/cart/actions';
 import {useCart} from './cart-context';
 import CloseCart from '@/components/cart/close-cart';
 import {DeleteItemButton} from '@/components/cart/delete-item-button';
@@ -195,7 +195,7 @@ export default function CartModal() {
                                     </div>
                                     <button
                                         className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
-                                        onClick={redirectToCheckout}
+                                        onClick={() => redirectToCheckout(cart.lines)}
                                     >
                                         Proceed to Checkout
                                     </button>

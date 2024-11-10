@@ -15,7 +15,7 @@ class Kernel extends HttpKernel
         // Global middleware
         \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class, // Updated in newer Laravel versions
+        \App\Http\Middleware\HandleCors::class, // Updated in newer Laravel versions
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,

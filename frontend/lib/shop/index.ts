@@ -49,7 +49,7 @@ const mockProduct: {
             height: 1000
         },
         {
-            url: '/img/products/product_2.png',
+            url: '/img/products/product_1.png',
             altText: 'test',
             width: 1000,
             height: 1000

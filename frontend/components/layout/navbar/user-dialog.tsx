@@ -125,7 +125,7 @@ export default function UserDialog() {
                             </div>
 
                             {isAuthenticated ? (
-                                <UserProfile user={user!} onLogout={handleLogout} />
+                                <UserProfile user={user!} onLogoutAction={handleLogout} />
                             ) : (
                                 <>
                                     {showSignUp ? (

@@ -3,6 +3,20 @@
 import clsx from 'clsx';
 import {useProduct, useUpdateURL} from '@/components/product/product-context';
 
+type Option = {
+    id: string;
+    value: string;
+    availableForSale?: boolean;
+};
+
+type AttributeOptionGroup = {
+    variants: {
+        id: string;
+        name: string;
+    };
+    options: Option[];
+};
+
 export function VariantSelector({variants = []}: {
     variants: any[];
 }) {
@@ -15,12 +29,12 @@ export function VariantSelector({variants = []}: {
         return null;
     }
 
-    return variants[0].attribute_options.map((attributeOptionGroup) => (
+    return variants[0].attribute_options.map((attributeOptionGroup: AttributeOptionGroup) => (
         <form key={attributeOptionGroup.variants.id}>
             <dl className="mb-8">
                 <dt className="mb-4 text-sm uppercase tracking-wide">{attributeOptionGroup.variants.name}</dt>
                 <dd className="flex flex-wrap gap-3">
-                    {attributeOptionGroup.options.map((option) => {
+                    {attributeOptionGroup.options.map((option: Option) => {
                         const optionNameLowerCase = attributeOptionGroup.variants.name.toLowerCase();
                         const isActive = state[optionNameLowerCase] === option.value;
 

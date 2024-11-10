@@ -17,10 +17,10 @@ export function ProductDescription({ product }: { product: Product }) {
                 </div>
             </div>
             <VariantSelector variants={product.skus} />
-            {product.descriptionHtml ? (
+            {product.description ? (
                 <Prose
                     className="mb-6 text-sm leading-tight dark:text-white/[60%]"
-                    html={product.descriptionHtml}
+                    html={product.description}
                 />
             ) : null}
             <AddToCart product={product} />

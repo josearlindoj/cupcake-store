@@ -1,8 +1,6 @@
-// Profile.tsx
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import ModalAddress from "@/components/layout/modal-address";
 import axios from "axios";
 
@@ -11,10 +9,10 @@ interface UserProfileProps {
         name: string;
         email: string;
     };
-    onLogout: () => void;
+    onLogoutAction: () => void;
 }
 
-export default function Profile({ user, onLogout }: UserProfileProps) {
+export default function Profile({ user, onLogoutAction }: UserProfileProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
@@ -97,7 +95,7 @@ export default function Profile({ user, onLogout }: UserProfileProps) {
                 <div className="grid grid-cols-2 items-center">
                     <span className="text-lg font-medium">Welcome, {user.name}</span>
                     <a
-                        onClick={onLogout}
+                        onClick={onLogoutAction}
                         className="cursor-pointer font-bold p-2 justify-self-end text-lg underline-offset-4 hover:text-black hover:underline md:inline-block md:text-sm dark:hover:text-neutral-300"
                     >
                         Logout

@@ -1,79 +1,20 @@
-import {Cart, Menu, Page, Product, Image} from '@/lib/shop/types';
+import {Menu, Product, Image} from '@/lib/shop/types';
 import axios from "axios";
 
-const mockCart: Cart = {
-    lines: [
-        {
-            id: "cart-item-1",
-            quantity: 2,
-            cost: {
-                totalAmount: {
-                    amount: "100.00",
-                    currencyCode: "USD",
-                },
-            },
-            merchandise: {
-                id: "product-1-variant-1",
-                title: "T-shirt - Blue",
-                selectedOptions: [
-                    {
-                        name: "Color",
-                        value: "Blue",
-                    },
-                    {
-                        name: "Size",
-                        value: "M",
-                    },
-                ],
-                product: {
-                    id: "product-1",
-                    handle: "t-shirt",
-                    title: "T-shirt",
-                    featuredImage: {
-                        src: "/img/products/t-shirt-blue.jpg",
-                        altText: "Blue T-shirt",
-                    },
-                },
-            },
-        },
-        {
-            id: "cart-item-2",
-            quantity: 1,
-            cost: {
-                totalAmount: {
-                    amount: "150.00",
-                    currencyCode: "USD",
-                },
-            },
-            merchandise: {
-                id: "product-2-variant-1",
-                title: "Sneakers - White",
-                selectedOptions: [
-                    {
-                        name: "Color",
-                        value: "White",
-                    },
-                    {
-                        name: "Size",
-                        value: "9",
-                    },
-                ],
-                product: {
-                    id: "product-2",
-                    handle: "sneakers",
-                    title: "Sneakers",
-                    featuredImage: {
-                        src: "/img/products/sneakers-white.jpg",
-                        altText: "White sneakers",
-                    },
-                },
-            },
-        },
-    ],
-};
-
-// Define a mock product
-const mockProduct: Product = {
+const mockProduct: {
+    availableForSale: boolean;
+    images: ({ altText: string; width: number; url: string; height: number })[];
+    featuredImage: { altText: string; width: number; url: string; height: number };
+    description: string;
+    handle: string;
+    id: string;
+    title: string;
+    priceRange: {
+        maxVariantPrice: { amount: string; currencyCode: string };
+        minVariantPrice: { amount: string; currencyCode: string }
+    };
+    tags: string[]
+} = {
     id: 'mock-id',
     title: 'Test Product',
     handle: 'test-product',
@@ -100,10 +41,6 @@ const mockProduct: Product = {
         "Summer Collection",
         "Free Shipping",
     ],
-    seo: {
-        title: "Cupcake Store - Best Cupcakes Online",
-        description: "Shop the best cupcakes online with a wide variety of flavors. Enjoy free shipping and high-quality, handcrafted cupcakes delivered to your door.",
-    },
     images: [
         {
             url: '/img/products/product_1.png',
@@ -118,65 +55,6 @@ const mockProduct: Product = {
             height: 1000
         }
     ],
-    variants: [
-        {
-            id: "variant-1",
-            title: "T-shirt - Red / Medium",
-            availableForSale: true,
-            selectedOptions: [
-                {
-                    name: "Color",
-                    value: "Red",
-                },
-                {
-                    name: "Size",
-                    value: "Medium",
-                },
-            ],
-            price: {
-                amount: "25.00",
-                currencyCode: "USD",
-            },
-        },
-        {
-            id: "variant-2",
-            title: "T-shirt - Blue / Large",
-            availableForSale: false,
-            selectedOptions: [
-                {
-                    name: "Color",
-                    value: "Blue",
-                },
-                {
-                    name: "Size",
-                    value: "Large",
-                },
-            ],
-            price: {
-                amount: "27.00",
-                currencyCode: "USD",
-            },
-        },
-        {
-            id: "variant-3",
-            title: "T-shirt - Green / Small",
-            availableForSale: true,
-            selectedOptions: [
-                {
-                    name: "Color",
-                    value: "Green",
-                },
-                {
-                    name: "Size",
-                    value: "Small",
-                },
-            ],
-            price: {
-                amount: "24.00",
-                currencyCode: "USD",
-            },
-        },
-    ],
     priceRange: {
         maxVariantPrice: {
             amount: '10.00',
@@ -187,18 +65,6 @@ const mockProduct: Product = {
             currencyCode: 'USD'
         }
     },
-    options: [
-        {
-            id: "option-1",
-            name: "Color",
-            values: ["Red", "Blue", "Green", "Black"],
-        },
-        {
-            id: "option-2",
-            name: "Size",
-            values: ["Small", "Medium", "Large", "Extra Large"],
-        }
-    ]
 };
 
 // Define multiple mock products for testing
@@ -206,41 +72,22 @@ const mockProducts: Product[] = [
     {
         ...mockProduct,
         handle: 'test-product-1',
-        title: 'Test Product 1'
+        title: 'Test Product 1',
+        skus: []
     },
     {
         ...mockProduct,
         handle: 'test-product-2',
-        title: 'Test Product 2'
+        title: 'Test Product 2',
+        skus: []
     },
     {
         ...mockProduct,
         handle: 'test-product-3',
-        title: 'Test Product 3'
+        title: 'Test Product 3',
+        skus: []
     }
 ];
-
-export async function addToCart(
-    cartId: string,
-    lines: { merchandiseId: string; quantity: number }[]
-): Promise<Cart> {
-    return mockCart;
-}
-
-export async function createCart(): Promise<Cart> {
-    return mockCart;
-}
-
-export async function removeFromCart(cartId: string, lineIds: string[]): Promise<Cart> {
-    return mockCart;
-}
-
-export async function updateCart(
-    cartId: string,
-    lines: { id: string; merchandiseId: string; quantity: number }[]
-): Promise<Cart> {
-    return mockCart;
-}
 
 export async function getMenu(handle: string): Promise<Menu[]> {
     return [

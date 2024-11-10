@@ -16,7 +16,16 @@ type Catalog = {
     }>;
 };
 
-const formatProducts = (productsData: any[]): Product[] => {
+const formatProducts = (productsData: any[]): {
+    featuredImage: { altText: any; width: number; url: any; height: number };
+    handle: any;
+    id: any;
+    title: any;
+    priceRange: {
+        maxVariantPrice: { amount: string; currencyCode: string };
+        minVariantPrice: { amount: string; currencyCode: string }
+    }
+}[] => {
     return productsData.map((product) => ({
         id: product.id,
         title: product.name,
@@ -29,11 +38,11 @@ const formatProducts = (productsData: any[]): Product[] => {
         },
         priceRange: {
             maxVariantPrice: {
-                amount: String(Math.max(...product.skus.map((sku) => sku.price))),
+                amount: String(Math.max(...product.skus.map((sku: { price: any; }) => sku.price))),
                 currencyCode: "USD",
             },
             minVariantPrice: {
-                amount: String(Math.min(...product.skus.map((sku) => sku.price))),
+                amount: String(Math.min(...product.skus.map((sku: { price: any; }) => sku.price))),
                 currencyCode: "USD",
             },
         },

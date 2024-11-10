@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2022-11-15',
+    apiVersion: '2024-10-28.acacia',
 });
 
 export async function POST(request: Request) {
     try {
         const { cartItems } = await request.json();
-        
+
         if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
             return NextResponse.json({ error: 'Cart is empty or invalid.' }, { status: 400 });
         }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
             if (!totalAmount || isNaN(totalAmount)) {
                 throw new Error('Invalid total amount for item.');
             }
-            const unitAmount = Math.round(totalAmount / quantity * 100);
+            const unitAmount = Math.round((totalAmount / quantity) * 100); // Ensure proper parentheses
 
             const productData: any = {
                 name: productTitle,

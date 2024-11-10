@@ -1,6 +1,6 @@
 import Grid from '@/components/grid';
 import ProductGridItems from '@/components/layout/product-grid-items';
-import {getProducts} from '@/lib/shop';
+import { getProducts } from '@/lib/shop';
 
 export const metadata = {
     title: 'Search',
@@ -8,7 +8,8 @@ export const metadata = {
 };
 
 export default async function ProductPage() {
-    const products = await getProducts();
+    const products = (await getProducts()) || [];
+
     const resultsText = products.length > 1 ? 'results' : 'result';
 
     return (
@@ -20,7 +21,7 @@ export default async function ProductPage() {
             </p>
             {products.length > 0 ? (
                 <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    <ProductGridItems products={products}/>
+                    <ProductGridItems products={products} />
                 </Grid>
             ) : null}
         </>

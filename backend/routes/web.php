@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ProductController;
 
+Route::get('/', function () {
+    return redirect()->route('admin.login');
+})->name('home');
+
+Route::get('/admin', function () {
+    return redirect()->route('admin.login');
+})->name('admin.home');
+
 Route::prefix('admin')->group(function () {
     // Show login form
     Route::get('login', [AdminController::class, 'showLoginForm'])->name('admin.login');

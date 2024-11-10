@@ -1,6 +1,6 @@
 'use client';
 
-import type { Cart, CartItem, Product, ProductVariant } from '@/lib/shop/types';
+import type {Cart, CartItem, Product, SKU} from '@/lib/shop/types';
 import React, {
     createContext,
     useContext,
@@ -14,14 +14,14 @@ import Cookies from 'js-cookie';
 type UpdateType = 'plus' | 'minus' | 'delete';
 
 type CartAction =
-    | { type: 'UPDATE_ITEM'; payload: { merchandiseId: string; updateType: UpdateType } }
-    | { type: 'ADD_ITEM'; payload: { variant: ProductVariant; product: Product } }
+    | { type: 'UPDATE_ITEM'; payload: { merchandiseId: number; updateType: UpdateType } }
+    | { type: 'ADD_ITEM'; payload: { variant: SKU; product: Product } }
     | { type: 'CLEAR_CART' };
 
 type CartContextType = {
     cart: Cart | undefined;
-    updateCartItem: (merchandiseId: string, updateType: UpdateType) => void;
-    addCartItem: (variant: ProductVariant, product: Product) => void;
+    updateCartItem: (merchandiseId: number, updateType: UpdateType) => void;
+    addCartItem: (variant: SKU, product: Product) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -65,8 +65,7 @@ function createOrUpdateCartItem(
         variant.attribute_options?.map((attributeOptionGroup: any) => {
             const name = attributeOptionGroup.variants.name;
             const selectedOption = attributeOptionGroup.options.find((option: any) => {
-                // Implement your logic to determine the selected option
-                return option.selected; // Adjust as needed
+                return option.selected;
             });
             return {
                 name,
@@ -153,11 +152,13 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
     switch (action.type) {
         case 'UPDATE_ITEM': {
             const { merchandiseId, updateType } = action.payload;
-            const updatedLines = currentCart.lines
+            const updatedLines: CartItem[] = currentCart.lines
                 .map((item) =>
-                    item.merchandise.id === merchandiseId ? updateCartItemFunction(item, updateType) : item
+                    item.merchandise.id === merchandiseId
+                        ? updateCartItemFunction(item, updateType)
+                        : item
                 )
-                .filter(Boolean) as CartItem[];
+                .filter((item): item is CartItem => Boolean(item));
 
             if (updatedLines.length === 0) {
                 return {
@@ -175,11 +176,14 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
         }
         case 'ADD_ITEM': {
             const { variant, product } = action.payload;
+            // @ts-ignore
             const existingItem = currentCart.lines.find((item) => item.merchandise.id === variant.id);
             const updatedItem = createOrUpdateCartItem(existingItem, variant, product);
 
-            const updatedLines = existingItem
-                ? currentCart.lines.map((item) => (item.merchandise.id === variant.id ? updatedItem : item))
+            const updatedLines: CartItem[] = existingItem
+                ? currentCart.lines.map((item) =>
+                    item.merchandise.id === variant.id ? updatedItem : item
+                )
                 : [...currentCart.lines, updatedItem];
 
             return { ...currentCart, ...updateCartTotals(updatedLines), lines: updatedLines };
@@ -201,13 +205,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         saveCartToCookies(optimisticCart);
     }, [optimisticCart]);
 
-    const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
+    const updateCartItem = (merchandiseId: number, updateType: UpdateType) => {
         startTransition(() => {
             updateOptimisticCart({ type: 'UPDATE_ITEM', payload: { merchandiseId, updateType } });
         });
     };
 
-    const addCartItem = (variant: ProductVariant, product: Product) => {
+    const addCartItem = (variant: SKU, product: Product) => {
         startTransition(() => {
             updateOptimisticCart({ type: 'ADD_ITEM', payload: { variant, product } });
         });

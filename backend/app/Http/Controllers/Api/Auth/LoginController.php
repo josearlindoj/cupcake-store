@@ -68,6 +68,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
+
         if (!$user || !$user->currentAccessToken()) {
             return response()->json([
                 'message' => 'No authenticated user found or no token to revoke.',

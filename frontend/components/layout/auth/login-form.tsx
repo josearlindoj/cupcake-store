@@ -4,11 +4,11 @@ import { useState } from "react";
 import LoadingIcon from "@/components/icons/loading";
 
 interface LoginFormProps {
-    onToggle: () => void;
-    onSuccess?: () => void;
+    onToggleAction: () => void;
+    onSuccessAction: (userData: { name: string; email: string; }) => void;
 }
 
-export default function LoginForm({ onToggle, onSuccess }: LoginFormProps) {
+export default function LoginForm({ onToggleAction, onSuccessAction }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -42,7 +42,7 @@ export default function LoginForm({ onToggle, onSuccess }: LoginFormProps) {
                 storage.setItem("tokenExpiresAt", expires_at);
                 storage.setItem("user", JSON.stringify(user));
 
-                if (onSuccess) onSuccess();
+                if (onSuccessAction) onSuccessAction(user);
             } else if (response.status === 401) {
                 setError("Invalid login credentials.");
             } else {
@@ -97,24 +97,24 @@ export default function LoginForm({ onToggle, onSuccess }: LoginFormProps) {
 
             <div className="flex flex-col items-center space-y-4">
                 <div className="flex items-center justify-between w-full">
-                    <label className="flex items-center space-x-2 text-gray-300">
-                        <input
-                            type="checkbox"
-                            checked={rememberMe}
-                            onChange={() => setRememberMe(!rememberMe)}
-                            className="text-indigo-500 border-gray-600 focus:ring-0 focus:ring-offset-0"
-                        />
-                        <span>Remember me</span>
-                    </label>
-                    <a href="#"
-                       className="block p-2 text-lg underline-offset-4 hover:text-black hover:underline md:inline-block md:text-sm dark:hover:text-neutral-300">Forgot
-                        password?</a>
+                    {/*<label className="flex items-center space-x-2 text-gray-300">*/}
+                    {/*    <input*/}
+                    {/*        type="checkbox"*/}
+                    {/*        checked={rememberMe}*/}
+                    {/*        onChange={() => setRememberMe(!rememberMe)}*/}
+                    {/*        className="text-indigo-500 border-gray-600 focus:ring-0 focus:ring-offset-0"*/}
+                    {/*    />*/}
+                    {/*    <span>Remember me</span>*/}
+                    {/*</label>*/}
+                    {/*<a href="#"*/}
+                    {/*   className="block p-2 text-lg underline-offset-4 hover:text-black hover:underline md:inline-block md:text-sm dark:hover:text-neutral-300">Forgot*/}
+                    {/*    password?</a>*/}
                 </div>
 
                 <p className="text-gray-400">
                     Don’t have an account yet?
                     <a
-                        onClick={onToggle}
+                        onClick={onToggleAction}
                         className="cursor-pointer font-bold p-2 text-lg underline-offset-4 hover:text-black hover:underline md:inline-block md:text-sm dark:hover:text-neutral-300"
                     >
                         Sign up

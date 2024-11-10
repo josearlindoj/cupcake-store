@@ -1,16 +1,19 @@
 'use client';
 
-import {PlusIcon} from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import {useProduct} from '@/components/product/product-context';
-import {Product} from '@/lib/shop/types';
-import {useCart} from '@/components/cart/cart-context';
+import { useProduct } from '@/components/product/product-context';
+import { Product, SKU } from '@/lib/shop/types';
+import { useCart } from '@/components/cart/cart-context';
+import React from 'react';
 
-function SubmitButton({
-                          availableForSale,
-                          selectedVariantId,
-                          onClick,
-                      }) {
+interface SubmitButtonProps {
+    availableForSale: boolean;
+    selectedVariantId?: number;
+    onClick: () => void;
+}
+
+function SubmitButton({ availableForSale, selectedVariantId, onClick, }: SubmitButtonProps) {
     const buttonClasses =
         'relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white';
     const disabledClasses = 'cursor-not-allowed opacity-60 hover:opacity-60';
@@ -31,7 +34,7 @@ function SubmitButton({
                 className={clsx(buttonClasses, disabledClasses)}
             >
                 <div className="absolute left-0 ml-4">
-                    <PlusIcon className="h-5"/>
+                    <PlusIcon className="h-5" />
                 </div>
                 Add To Cart
             </button>
@@ -47,15 +50,18 @@ function SubmitButton({
             onClick={onClick}
         >
             <div className="absolute left-0 ml-4">
-                <PlusIcon className="h-5"/>
+                <PlusIcon className="h-5" />
             </div>
             Add To Cart
         </button>
     );
 }
 
-// @ts-ignore
-export function AddToCart({product}) {
+interface AddToCartProps {
+    product: Product;
+}
+
+export function AddToCart({ product }: AddToCartProps) {
     const {skus = [], availableForSale} = product;
     const {addCartItem} = useCart();
     const {state} = useProduct();
@@ -70,8 +76,8 @@ export function AddToCart({product}) {
 
     const defaultVariantId = skus.length === 1 ? skus[0]?.id : undefined;
     const selectedVariantId = variant?.id || defaultVariantId;
-    const finalVariant = skus.find((sku: { id: any; }) => sku.id === selectedVariantId);
-    console.log(finalVariant)
+    const finalVariant = skus.find((sku: SKU) => sku.id === selectedVariantId);
+
     const handleAddToCart = () => {
         if (finalVariant) {
             addCartItem(finalVariant, product);

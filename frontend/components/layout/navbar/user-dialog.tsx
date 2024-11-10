@@ -52,6 +52,14 @@ export default function UserDialog() {
     const handleLogout = async () => {
         try {
             const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
+            if (!token) {
+                console.warn("No access token found. User may already be logged out.");
+                clearAuthData();
+                closeModel();
+                return;
+            }
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/logout`, {
                 method: "POST",
                 headers: {
@@ -64,7 +72,8 @@ export default function UserDialog() {
                 clearAuthData();
                 closeModel();
             } else {
-                throw new Error("Failed to log out. Please try again.");
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to log out. Please try again.");
             }
         } catch (error) {
             console.error("Logout error:", error);
@@ -123,8 +132,8 @@ export default function UserDialog() {
                                         <SignupForm onToggle={toggleForm} />
                                     ) : (
                                         <LoginForm
-                                            onToggle={toggleForm}
-                                            onSuccess={(userData) => handleLoginSuccess(userData)}
+                                            onToggleAction={toggleForm}
+                                            onSuccessAction={(userData: { name: string; email: string; }) => handleLoginSuccess(userData)}
                                         />
                                     )}
                                 </>

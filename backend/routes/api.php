@@ -18,7 +18,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/catalogs', [CatalogController::class, 'index']);
 
 // Logout Route
-Route::post('/logout', [LoginController::class, 'logout']);
+
 
 Route::get('/products/image/{product}', [ProductController::class, 'showImageByName'])->name('products.image');
 
@@ -40,4 +40,6 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\CheckTokenExpiry::class]
 
     // Token Refresh Route
     Route::post('/refresh-token', [LoginController::class, 'refreshToken']);
+
+    Route::post('/logout', [LoginController::class, 'logout']);
 });

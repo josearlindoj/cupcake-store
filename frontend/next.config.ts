@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
         domains: [
             'localhost',
             'cupcake-store-a1d66243d848.herokuapp.com/admin/products',
-            'cupcake-store-frontend-fc44c717c483.herokuapp.com'
+            'cupcake-store-frontend-fc44c717c483.herokuapp.com',
+            'cupcake-store.s3.us-east-2.amazonaws.com'
         ],
     },
     async headers() {

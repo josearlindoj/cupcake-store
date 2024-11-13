@@ -22,12 +22,20 @@ class ProductForm extends Component
     public array $productAttributes = [];
     public bool $isEdit = false;
     public array $photoPreviews = [];
-    public array $photos = [];
+
+    public $photo1;
+    public $photo2 = null;
+    public $photo3 = null;
+    public $photo4 = null;
+
 
     protected $rules = [
         'name' => 'required|string|max:255',
         'slug' => 'required|string|max:255|unique:products,slug',
-        'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        'photo1' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'photo2' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'photo3' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'photo4' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'skus.*.code' => 'required|string|max:50|unique:skus,code',
         'skus.*.price' => 'required|numeric|min:0',
         'skus.*.stock' => 'required|integer|min:0',
@@ -58,7 +66,13 @@ class ProductForm extends Component
                 ];
             })->toArray();
 
-            $this->photoPreviews = $this->product->images->pluck('image_path')->toArray();
+            // Load existing images and generate URLs
+            $this->photoPreviews = $this->product->images->map(function ($image) {
+                return [
+                    'path' => $image->image_path,
+                    'url'  => Storage::disk('s3')->url($image->image_path),
+                ];
+            })->toArray();
         } else {
             $this->product = new Product();
             $this->isEdit = false;
@@ -80,28 +94,36 @@ class ProductForm extends Component
         $this->skus = array_values($this->skus);
     }
 
-    public function updatedPhotos()
-    {
-        $this->validateOnly('photos');
-
-        $totalImages = count($this->photoPreviews) + count($this->photos);
-        if ($totalImages > 6) {
-            $this->addError('photos', 'You can upload a maximum of 6 images.');
-            $this->photos = array_slice($this->photos, 0, 6 - count($this->photoPreviews));
-        }
-    }
-
     public function removeImage($index, $type = 'photos')
     {
-        if ($type === 'previews' && isset($this->photoPreviews[$index])) {
-            $imagePath = $this->photoPreviews[$index];
-            Storage::disk('public')->delete($imagePath);
+        if ($type === 'photoPreviews' && isset($this->photoPreviews[$index])) {
+            $imagePath = $this->photoPreviews[$index]['path'];
+
+            // Delete image from S3
+            Storage::disk('s3')->delete($imagePath);
+
+            // Remove image record from the database
             $this->product->images()->where('image_path', $imagePath)->delete();
+
+            // Remove from the photo previews array
             unset($this->photoPreviews[$index]);
             $this->photoPreviews = array_values($this->photoPreviews);
-        } elseif ($type === 'photos' && isset($this->photos[$index])) {
-            unset($this->photos[$index]);
-            $this->photos = array_values($this->photos);
+        } elseif ($type === 'photos') {
+            // Handle removal of new photos
+            switch ($index) {
+                case 1:
+                    $this->photo1 = null;
+                    break;
+                case 2:
+                    $this->photo2 = null;
+                    break;
+                case 3:
+                    $this->photo3 = null;
+                    break;
+                case 4:
+                    $this->photo4 = null;
+                    break;
+            }
         }
     }
 
@@ -123,16 +145,10 @@ class ProductForm extends Component
         $this->product->slug = $this->slug;
         $this->product->save();
 
-        // Handle image upload and storage
-        $totalImages = count($this->photoPreviews) + count($this->photos);
-        if ($totalImages > 6) {
-            $this->addError('photos', 'You can upload a maximum of 6 images.');
-            return;
-        }
-
-        if (!empty($this->photos)) {
-            foreach ($this->photos as $photo) {
-                $path = $photo->store('products', 'public');
+        $photos = [$this->photo1, $this->photo2, $this->photo3, $this->photo4];
+        foreach ($photos as $photo) {
+            if ($photo) {
+                $path = $photo->store('products', 's3');
                 $this->product->images()->create(['image_path' => $path]);
             }
         }

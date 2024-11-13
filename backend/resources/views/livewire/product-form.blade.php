@@ -12,7 +12,7 @@
         </h2>
     </div>
 
-    <form wire:submit.prevent="save" class="space-y-6">
+    <form wire:submit.prevent="save" enctype="multipart/form-data" class="space-y-6">
         <div>
             <label class="block text-sm font-medium leading-6 text-gray-900">Product Name</label>
             <input type="text" wire:model="name"
@@ -21,32 +21,76 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium leading-6 text-gray-900">Product Images (max 6)</label>
-            <input type="file" wire:model="photos" multiple
-                   class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none">
-            @error('photos') <span class="text-red-600">{{ $message }}</span> @enderror
-            @error('photos.*') <span class="text-red-600">{{ $message }}</span> @enderror
-
-            <div class="mt-4 grid grid-cols-6 gap-4">
-                @foreach($photoPreviews as $index => $image)
-                    <div class="relative">
-                        <img src="{{ Storage::url($image) }}" alt="Product Image" class="w-full h-20 object-cover rounded-md">
-                        <button type="button" wire:click="removeImage({{ $index }}, 'photoPreviews')"
-                                class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
-                            &times;
-                        </button>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Product Images -->
+                <div>
+                    <label class="block text-sm font-medium leading-6 text-gray-900">Product Images (max 4)</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Photo 1 -->
+                        <div>
+                            <input type="file" wire:model="photo1" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none">
+                            @if ($photo1)
+                                <div class="relative mt-2">
+                                    <img src="{{ $photo1->temporaryUrl() }}" alt="Preview" class="w-full h-20 object-cover rounded-md">
+                                    <button type="button" wire:click="removeImage(1)" class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                                        &times;
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                        <!-- Photo 2 -->
+                        <div>
+                            <input type="file" wire:model="photo2" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none">
+                            @if ($photo2)
+                                <div class="relative mt-2">
+                                    <img src="{{ $photo2->temporaryUrl() }}" alt="Preview" class="w-full h-20 object-cover rounded-md">
+                                    <button type="button" wire:click="removeImage(2)" class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                                        &times;
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                        <!-- Photo 3 -->
+                        <div>
+                            <input type="file" wire:model="photo3" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none">
+                            @if ($photo3)
+                                <div class="relative mt-2">
+                                    <img src="{{ $photo3->temporaryUrl() }}" alt="Preview" class="w-full h-20 object-cover rounded-md">
+                                    <button type="button" wire:click="removeImage(3)" class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                                        &times;
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                        <!-- Photo 4 -->
+                        <div>
+                            <input type="file" wire:model="photo4" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none">
+                            @if ($photo4)
+                                <div class="relative mt-2">
+                                    <img src="{{ $photo4->temporaryUrl() }}" alt="Preview" class="w-full h-20 object-cover rounded-md">
+                                    <button type="button" wire:click="removeImage(4)" class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                                        &times;
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                @endforeach
 
-                @foreach($photos as $index => $photo)
-                    <div class="relative">
-                        <img src="{{ $photo->temporaryUrl() }}" alt="Product Image" class="w-full h-20 object-cover rounded-md">
-                        <button type="button" wire:click="removeImage({{ $index }}, 'photos')"
-                                class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
-                            &times;
-                        </button>
-                    </div>
-                @endforeach
+                    <!-- Existing Images Previews -->
+                    @if (!empty($photoPreviews))
+                        <div class="mt-4 grid grid-cols-6 gap-4">
+                            @foreach($photoPreviews as $index => $image)
+                                <div class="relative">
+                                    <img src="{{ $image['url'] }}" alt="Product Image" class="w-full h-20 object-cover rounded-md">
+                                    <button type="button" wire:click="removeImage({{ $index }}, 'photoPreviews')"
+                                            class="absolute top-0 right-0 mt-1 mr-1 text-white bg-red-600 hover:bg-red-700 rounded-full p-1">
+                                        &times;
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
 
         </div>

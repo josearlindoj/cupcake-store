@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CatalogController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
@@ -25,6 +26,7 @@ Route::prefix('admin')->group(function () {
     Route::middleware(['web', 'auth:admin'])->group(function () {
         Route::get('dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::resource('products', ProductController::class);
+        Route::resource('users', UserController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('attributes', AttributeController::class);
         Route::resource('catalogs', CatalogController::class);

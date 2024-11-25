@@ -15,15 +15,16 @@ export default function ProductGridItems({ products }: { products: Product[] }) 
                         prefetch={true}
                     >
                         <GridTileImage
+                            src={product.featuredImage?.url  || '/img/products/product_1.png'}
+                            fill
+                            sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
                             alt={product.title}
+                            priority={true}
                             label={{
                                 title: product.title,
                                 amount: product.priceRange.maxVariantPrice.amount,
                                 currencyCode: product.priceRange.maxVariantPrice.currencyCode,
                             }}
-                            src={product.featuredImage?.url}
-                            fill
-                            sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
                         />
                     </Link>
                 </Grid.Item>

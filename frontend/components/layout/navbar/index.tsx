@@ -1,13 +1,15 @@
 import CartModal from '@/components/cart/modal';
+import {PresentationChartBarIcon, ShoppingCartIcon, UserIcon} from '@heroicons/react/24/outline';
 import LogoSquare from '@/components/logo-square';
-import { getMenu } from '@/lib/shop';
-import { Menu } from '@/lib/shop/types';
+import {getMenu} from '@/lib/shop';
+import {Menu} from '@/lib/shop/types';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import {Suspense} from 'react';
 import MobileMenu from '@/components/layout/navbar/mobile-menu';
 import UserDialog from "@/components/layout/navbar/user-dialog";
+import clsx from "clsx";
 
-const { SITE_NAME } = process.env;
+const {SITE_NAME} = process.env;
 
 export async function Navbar() {
     const menu = await getMenu('next-js-frontend-header-menu');
@@ -16,7 +18,7 @@ export async function Navbar() {
         <nav className="relative flex items-center justify-between p-4 lg:px-6">
             <div className="block flex-none md:hidden">
                 <Suspense fallback={null}>
-                    <MobileMenu menu={menu} />
+                    <MobileMenu menu={menu}/>
                 </Suspense>
             </div>
             <div className="flex w-full items-center">
@@ -54,8 +56,18 @@ export async function Navbar() {
                     <div className="mr-2">
                         <UserDialog/>
                     </div>
-                    <div>
+                    <div className="mr-2">
                         <CartModal/>
+                    </div>
+                    <div>
+                        <a href="https://cupcake-store-a1d66243d848.herokuapp.com/admin/login" aria-label="Open user dialog">
+                            <div
+                                className="relative flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:text-white">
+                                <PresentationChartBarIcon
+                                    className={clsx('h-4 transition-all ease-in-out hover:scale-110')}
+                                />
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>

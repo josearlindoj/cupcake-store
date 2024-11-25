@@ -9,8 +9,7 @@ import {createUrl} from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import {Fragment, useEffect, useRef, useState} from 'react';
-import {useFormStatus} from 'react-dom';
-import { redirectToCheckout } from '@/components/cart/actions';
+import {redirectToCheckout} from '@/components/cart/actions';
 import {useCart} from './cart-context';
 import CloseCart from '@/components/cart/close-cart';
 import {DeleteItemButton} from '@/components/cart/delete-item-button';
@@ -22,24 +21,28 @@ type MerchandiseSearchParams = {
 };
 
 export default function CartModal() {
-    const {cart, updateCartItem} = useCart();
+    const { cart, updateCartItem } = useCart();
     const [isOpen, setIsOpen] = useState(false);
-    const quantityRef = useRef(cart?.totalQuantity);
+    const [step, setStep] = useState<'cart' | 'selection'>('cart');
+    const quantityRef = useRef(cart?.totalQuantity || 0); // Default to 0 if cart is undefined
+
     const openCart = () => setIsOpen(true);
     const closeCart = () => setIsOpen(false);
 
     useEffect(() => {
         if (
             cart?.totalQuantity &&
-            cart?.totalQuantity !== quantityRef.current &&
-            cart?.totalQuantity > 0
+            cart.totalQuantity !== quantityRef.current &&
+            cart.totalQuantity > 0
         ) {
             if (!isOpen) {
                 setIsOpen(true);
             }
-            quantityRef.current = cart?.totalQuantity;
+            quantityRef.current = cart.totalQuantity;
         }
     }, [isOpen, cart?.totalQuantity]);
+
+    const handleProceed = () => setStep('selection');
 
     return (
         <>
@@ -69,34 +72,42 @@ export default function CartModal() {
                         leaveTo="translate-x-full"
                     >
                         <Dialog.Panel
-                            className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-neutral-200 bg-white/80 p-6 text-black backdrop-blur-xl md:w-[390px] dark:border-neutral-700 dark:bg-black/80 dark:text-white">
+                            className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-neutral-200 bg-white/80 p-6 text-black backdrop-blur-xl md:w-[390px] dark:border-neutral-700 dark:bg-black/80 dark:text-white"
+                        >
                             <div className="flex items-center justify-between">
-                                <p className="text-lg font-semibold">My Cart</p>
+                                <p className="text-lg font-semibold">
+                                    {step === 'cart' ? 'My Cart' : 'Choose Delivery Method'}
+                                </p>
                                 <button aria-label="Close cart" onClick={closeCart}>
                                     <CloseCart/>
                                 </button>
                             </div>
 
-                            {!cart || cart.lines.length === 0 ? (
+                            {step === 'cart' && (!cart || cart.lines.length === 0) ? (
                                 <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
                                     <ShoppingCartIcon className="h-16"/>
                                     <p className="mt-6 text-center text-2xl font-bold">Your cart is empty.</p>
                                 </div>
-                            ) : (
+                            ) : step === 'cart' ? (
                                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                                     <ul className="flex-grow overflow-auto py-4">
-                                        {cart.lines
+                                        {cart?.lines
                                             .sort((a, b) =>
-                                                a.merchandise.product.title.localeCompare(b.merchandise.product.title)
+                                                a.merchandise.product.title.localeCompare(
+                                                    b.merchandise.product.title
+                                                )
                                             )
                                             .map((item, i) => {
-                                                const merchandiseSearchParams = {} as MerchandiseSearchParams;
+                                                const merchandiseSearchParams =
+                                                    {} as MerchandiseSearchParams;
 
-                                                item.merchandise.selectedOptions?.forEach(({name, value}) => {
-                                                    if (value !== DEFAULT_OPTION && name) {
-                                                        merchandiseSearchParams[name.toLowerCase()] = value;
+                                                item.merchandise.selectedOptions?.forEach(
+                                                    ({name, value}) => {
+                                                        if (value !== DEFAULT_OPTION && name) {
+                                                            merchandiseSearchParams[name.toLowerCase()] = value;
+                                                        }
                                                     }
-                                                });
+                                                );
 
                                                 const merchandiseUrl = createUrl(
                                                     `/product/${item.merchandise.product.handle}`,
@@ -124,23 +135,29 @@ export default function CartModal() {
                                                                         width={64}
                                                                         height={64}
                                                                         alt={
-                                                                            item.merchandise.product.featuredImage?.altText ||
+                                                                            item.merchandise.product.featuredImage
+                                                                                ?.altText ||
                                                                             item.merchandise.product.title ||
                                                                             'Product image'
                                                                         }
                                                                         src={
-                                                                            item.merchandise.product.featuredImage?.url ||
-                                                                            '/path/to/default-image.jpg'
+                                                                            item.merchandise.product.featuredImage
+                                                                                ?.url ||
+                                                                            '/img/products/product_1.png'
                                                                         }
                                                                     />
                                                                 </div>
-                                                                <Link href={merchandiseUrl} onClick={closeCart}
-                                                                      className="z-30 ml-2 flex flex-row space-x-4">
+                                                                <Link
+                                                                    href={merchandiseUrl}
+                                                                    onClick={closeCart}
+                                                                    className="z-30 ml-2 flex flex-row space-x-4"
+                                                                >
                                                                     <div className="flex flex-1 flex-col text-base">
                                                                         <span className="leading-tight">
-                                                                            {item.merchandise.product.title}
+                                                                          {item.merchandise.product.title}
                                                                         </span>
-                                                                        {item.merchandise.title !== DEFAULT_OPTION ? (
+                                                                        {item.merchandise.title !==
+                                                                        DEFAULT_OPTION ? (
                                                                             <p className="text-sm text-neutral-500 dark:text-neutral-400">
                                                                                 {item.merchandise.title}
                                                                             </p>
@@ -152,7 +169,9 @@ export default function CartModal() {
                                                                 <Price
                                                                     className="flex justify-end space-y-2 text-right text-sm"
                                                                     amount={item.cost.totalAmount.amount}
-                                                                    currencyCode={item.cost.totalAmount.currencyCode}
+                                                                    currencyCode={
+                                                                        item.cost.totalAmount.currencyCode
+                                                                    }
                                                                 />
                                                                 <div
                                                                     className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
@@ -162,8 +181,9 @@ export default function CartModal() {
                                                                         optimisticUpdate={updateCartItem}
                                                                     />
                                                                     <p className="w-6 text-center">
-                                                                        <span
-                                                                            className="w-full text-sm">{item.quantity}</span>
+                                                                    <span className="w-full text-sm">
+                                                                      {item.quantity}
+                                                                    </span>
                                                                     </p>
                                                                     <EditItemQuantityButton
                                                                         item={item}
@@ -188,17 +208,43 @@ export default function CartModal() {
                                             <p>Total</p>
                                             <Price
                                                 className="text-right text-base text-black dark:text-white"
-                                                amount={cart.cost.totalAmount.amount}
-                                                currencyCode={cart.cost.totalAmount.currencyCode}
+                                                amount={cart?.cost.totalAmount.amount ?? '0.00'}
+                                                currencyCode={cart?.cost.totalAmount.currencyCode ?? 'USD'}
                                             />
                                         </div>
                                     </div>
                                     <button
                                         className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
-                                        onClick={() => redirectToCheckout(cart.lines)}
+                                        onClick={handleProceed}
                                     >
-                                        Proceed to Checkout
+                                        Proceed to Next Step
                                     </button>
+                                </div>
+                            ) : (
+                                <div className="flex h-full flex-col justify-center items-center">
+                                    <p className="text-lg mb-4">
+                                        How would you like to receive your order?
+                                    </p>
+                                    <div className="space-y-4 w-full">
+                                        <button
+                                            className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
+                                            onClick={() => {
+                                                closeCart();
+                                                redirectToCheckout(cart?.lines ?? [], 'delivery');
+                                            }}
+                                        >
+                                            Receive Delivery (+$5 USD)
+                                        </button>
+                                        <button
+                                            className="block w-full rounded-full bg-green-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
+                                            onClick={() => {
+                                                closeCart();
+                                                redirectToCheckout(cart?.lines ?? [], 'store');
+                                            }}
+                                        >
+                                            Pick Up in Store
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </Dialog.Panel>
